@@ -19,6 +19,7 @@ extern GetMouseY
 extern rand
 extern srand
 extern time
+extern memcpy
 
 _start:
 	mov rdi, 0
@@ -40,7 +41,7 @@ randomize_cells:
 	inc rcx
 	push rcx
 	push rsi
-	cmp rcx, CELL_COUNT * CELL_COUNT
+	cmp rcx, CELLS_SIZE
 	jng randomize_cells
 	pop rdx
 	pop rdx
@@ -59,6 +60,11 @@ begin_draw:
 	mov rdi, 0
 	call ClearBackground
 
+	mov rdi, cells_copy
+	mov rsi, cells
+	mov rdx, CELLS_SIZE
+	call memcpy
+
 	sub rsp, 8 * 2 ; allocate stack 
 	mov QWORD[rsp + 8], 0 ; y
 	mov QWORD[rsp + 8], 0 ; x
@@ -70,7 +76,7 @@ loop_x:
 	imul rax, CELL_COUNT
 	add rax, QWORD[rsp + 8]
 
-	mov rsi, cells
+	mov rsi, cells_copy
 	add rsi, rax
 	mov al, byte[rsi]
 
@@ -113,9 +119,11 @@ section .data
 	HEIGHT equ 800
 	CELL_SIZE equ 20
 	CELL_COUNT equ WIDTH / CELL_SIZE
+	CELLS_SIZE equ CELL_COUNT * CELL_COUNT 
 	WHITE equ 0xFFFFFFFF
 
-	cells: times CELL_COUNT * CELL_COUNT  db 1
+	cells: times CELLS_SIZE db 1
+	cells_copy: times CELLS_SIZE  db 1
 	window_title: db "Raylib en ASM", 0
 	text: db "Congrats! You created your first window!", 0
 
