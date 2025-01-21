@@ -36,8 +36,8 @@ randomize_cells:
 	pop rcx
 
 	and rax, 0x1
-	inc rsi
 	mov BYTE[rsi], al
+	inc rsi
 	inc rcx
 	push rcx
 	push rsi
@@ -66,7 +66,7 @@ begin_draw:
 	call memcpy
 
 	sub rsp, 8 * 2 ; allocate stack 
-	mov QWORD[rsp + 8], 0 ; y
+	mov QWORD[rsp], 0 ; y
 	mov QWORD[rsp + 8], 0 ; x
 loop_y:
 	mov QWORD[rsp + 8], 0
