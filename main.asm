@@ -45,24 +45,24 @@ game_draw_loop:
 	mov rdi, 0
 	call ClearBackground
 
-	; call put_cell_from_mouse
+	call put_cell_from_mouse
 	call r_copy_cells_state
 
-	mov QWORD[rsp - 8], 1 ; y
-	mov QWORD[rsp - 16], 1 ; x
+	mov QWORD[rbp - 8], 1 ; y
+	mov QWORD[rbp - 16], 1 ; x
 loop_y:
-	mov QWORD[rsp - 16], 1
+	mov QWORD[rbp - 16], 1
 loop_x:
-	mov rdi, QWORD[rsp - 16]
-	mov rsi, QWORD[rsp - 8]
-	call r_get_index
+	; mov rdi, QWORD[rbp - 16]
+	; mov rsi, QWORD[rbp - 8]
+	; call r_get_index
 underpopulation:
 next_generation:
 overpopulation:
 reproduction:
-	mov rdi, QWORD[rsp - 16]
+	mov rdi, QWORD[rbp - 16]
 	sub rdi, 1
-	mov rsi, QWORD[rsp - 8]
+	mov rsi, QWORD[rbp - 8]
 	sub rsi, 1
 	call r_get_index
 
@@ -77,23 +77,23 @@ reproduction:
 set_live_color:
 	mov r8d, 0xFFFFFFFF
 draw_cell:
-	mov rdi, QWORD[rsp - 16] ; x
+	mov rdi, QWORD[rbp - 16] ; x
 	sub rdi, 1
 	imul rdi, CELL_SIZE
-	mov rsi, QWORD[rsp - 8] ; y
+	mov rsi, QWORD[rbp - 8] ; y
 	sub rsi, 1
 	imul rsi, CELL_SIZE
 	mov rdx, CELL_SIZE
 	mov rcx, CELL_SIZE
 	call DrawRectangle
 
-	mov rdx, QWORD[rsp - 16]
-	inc QWORD[rsp - 16]
+	mov rdx, QWORD[rbp - 16]
+	inc QWORD[rbp - 16]
 	cmp rdx, CELL_COUNT
 	jng loop_x
 
-	mov rdx, QWORD[rsp - 8]
-	inc QWORD[rsp - 8]
+	mov rdx, QWORD[rbp - 8]
+	inc QWORD[rbp - 8]
 	cmp rdx, CELL_COUNT
 	jng loop_y
 
@@ -106,14 +106,13 @@ exit_game_of_life:
 r_copy_cells_state:
 	push rbp
 	mov rbp, rsp
-	sub rsp, 16
 
 	mov rdi, cells_copy
 	mov rsi, cells
 	mov rdx, CELLS_SIZE
 	call memcpy
 
-	leave
+	pop rbp
 	ret
 
 put_cell_from_mouse:
@@ -168,12 +167,9 @@ randomize_cells_loop:
 
 r_get_index: ; x, y -> int
 	; index = y * CELL_COUNT + x
-        push rbp
-        mov rbp, rsp
 	imul rsi, CELL_COUNT
 	add rsi, rdi
 	mov rax, rsi
-	pop rbp
 	ret
 
 section .data
