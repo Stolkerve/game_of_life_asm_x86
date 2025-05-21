@@ -17,7 +17,7 @@ extern rand
 extern srand
 extern time
 extern memcpy
-extern IsMouseButtonPressed
+extern IsMouseButtonDown
 extern GetMouseX
 extern GetMouseY
 
@@ -117,7 +117,7 @@ r_copy_cells_state:
 
 put_cell_from_mouse:
 	mov rdi, MOUSE_BUTTON_LEFT
-	call IsMouseButtonPressed
+	call IsMouseButtonDown;
 
 	cmp rax, 1
 	je put_cell
@@ -138,6 +138,10 @@ put_cell:
 	mov rsi, rax ; y 
 	call r_get_index
 
+	cmp rax, CELLS_SIZE 
+	jl set_live_cell
+	ret
+set_live_cell
 	mov rsi, cells
 	add rsi, rax
 	mov byte[rsi], 1 
