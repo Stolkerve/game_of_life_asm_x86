@@ -48,10 +48,10 @@ game_draw_loop:
 	call put_cell_from_mouse
 	call r_copy_cells_state
 
-	mov QWORD[rbp - 8], 1 ; y
-	mov QWORD[rbp - 16], 1 ; x
+	mov QWORD[rbp - 8], 0 ; y
+	mov QWORD[rbp - 16], 0 ; x
 loop_y:
-	mov QWORD[rbp - 16], 1
+	mov QWORD[rbp - 16], 0
 loop_x:
 	; mov rdi, QWORD[rbp - 16]
 	; mov rsi, QWORD[rbp - 8]
@@ -61,9 +61,7 @@ next_generation:
 overpopulation:
 reproduction:
 	mov rdi, QWORD[rbp - 16]
-	sub rdi, 1
 	mov rsi, QWORD[rbp - 8]
-	sub rsi, 1
 	call r_get_index
 
 	mov rsi, cells_copy
@@ -78,10 +76,8 @@ set_live_color:
 	mov r8d, 0xFFFFFFFF
 draw_cell:
 	mov rdi, QWORD[rbp - 16] ; x
-	sub rdi, 1
 	imul rdi, CELL_SIZE
 	mov rsi, QWORD[rbp - 8] ; y
-	sub rsi, 1
 	imul rsi, CELL_SIZE
 	mov rdx, CELL_SIZE
 	mov rcx, CELL_SIZE
@@ -90,12 +86,12 @@ draw_cell:
 	mov rdx, QWORD[rbp - 16]
 	inc QWORD[rbp - 16]
 	cmp rdx, CELL_COUNT
-	jng loop_x
+	jle loop_x
 
 	mov rdx, QWORD[rbp - 8]
 	inc QWORD[rbp - 8]
 	cmp rdx, CELL_COUNT
-	jng loop_y
+	jle loop_y
 
 	call EndDrawing
 	jmp game_draw_loop
@@ -141,7 +137,7 @@ put_cell:
 	cmp rax, CELLS_SIZE 
 	jl set_live_cell
 	ret
-set_live_cell
+set_live_cell:
 	mov rsi, cells
 	add rsi, rax
 	mov byte[rsi], 1 
