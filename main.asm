@@ -45,7 +45,7 @@ game_draw_loop:
 	mov rdi, 0
 	call ClearBackground
 
-	call put_cell_from_mouse
+	call r_set_cell_live_from_mouse
 	call r_copy_cells_state
 
 	mov QWORD[rbp - 8], 0 ; y
@@ -53,13 +53,85 @@ game_draw_loop:
 loop_y:
 	mov QWORD[rbp - 16], 0
 loop_x:
-	; mov rdi, QWORD[rbp - 16]
-	; mov rsi, QWORD[rbp - 8]
-	; call r_get_index
+	mov rdi, QWORD[rbp - 16]
+	mov rsi, QWORD[rbp - 8]
+	call r_get_index
+	mov rsi, cells
+	add rsi, rax
+	mov QWORD[rbp - 24], rsi; copy current cell pointer
 underpopulation:
+	mov QWORD[rbp - 32], 0 ; n count
+	mov QWORD[rbp - 40], CELL_COUNT ; n count
+
+	; x + 1, y
+	mov rdi, QWORD[rbp - 16]
+	inc rdi
+	mov rax, rdi
+	cqo
+	idiv QWORD[rbp - 40]
+	mov rdi, rdx
+	mov rsi, QWORD[rbp - 8]
+	call r_get_index
+	mov rsi, cells
+	add rsi, rax
+	mov al, byte[rsi]
+	add QWORD[rbp - 32], rax
+
+	; x - 1, y
+	mov rdi, QWORD[rbp - 16]
+	dec rdi
+	cmp rdi, -1
+	jne asd
+	mov rdi, CELL_COUNT
+	asd:
+	mov rax, rdi
+	cqo
+	idiv QWORD[rbp - 40]
+	mov rdi, rdx
+	mov rsi, QWORD[rbp - 8]
+	call r_get_index
+	mov rsi, cells
+	add rsi, rax
+	mov al, byte[rsi]
+	add QWORD[rbp - 32], rax
+
+	; x, y + 1
+	mov rdi, QWORD[rbp - 16]
+	mov rsi, QWORD[rbp - 8]
+	inc rsi
+	mov rax, rsi
+	cqo
+	idiv QWORD[rbp - 40]
+	mov rsi, rdx
+	call r_get_index
+	mov rsi, cells
+	add rsi, rax
+	mov al, byte[rsi]
+	add QWORD[rbp - 32], rax
+
+	; x, y - 1
+	mov rdi, QWORD[rbp - 16]
+	mov rsi, QWORD[rbp - 8]
+	dec rsi
+	cmp rsi, -1
+	jne asd2
+	mov rsi, CELL_COUNT
+	asd2:
+	mov rax, rsi
+	cqo
+	idiv QWORD[rbp - 40]
+	mov rsi, rdx
+	call r_get_index
+	mov rsi, cells
+	add rsi, rax
+	mov al, byte[rsi]
+	add QWORD[rbp - 32], rax
+
+	is_currect_cell_dead:
 next_generation:
 overpopulation:
 reproduction:
+draw_cells:
 	mov rdi, QWORD[rbp - 16]
 	mov rsi, QWORD[rbp - 8]
 	call r_get_index
@@ -86,12 +158,12 @@ draw_cell:
 	mov rdx, QWORD[rbp - 16]
 	inc QWORD[rbp - 16]
 	cmp rdx, CELL_COUNT
-	jle loop_x
+	jl loop_x
 
 	mov rdx, QWORD[rbp - 8]
 	inc QWORD[rbp - 8]
 	cmp rdx, CELL_COUNT
-	jle loop_y
+	jl loop_y
 
 	call EndDrawing
 	jmp game_draw_loop
@@ -111,7 +183,7 @@ r_copy_cells_state:
 	pop rbp
 	ret
 
-put_cell_from_mouse:
+r_set_cell_live_from_mouse:
 	mov rdi, MOUSE_BUTTON_LEFT
 	call IsMouseButtonDown;
 
